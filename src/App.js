@@ -1,23 +1,33 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
+import { ListActivePlanTokensRequest } from "./protos/service_pb"
+import { PlanServiceClient } from "./protos/service_grpc_web_pb"
+
+var client = new PlanServiceClient('http://localhost:8000')
 function App() {
+  const [plans, setPlans] = useState(-9999);
+
+  const getPlans = () => {
+    console.log("called")
+
+    var request = new ListActivePlanTokensRequest()
+    debugger;
+    var stream = client.listActivePlanTokens(request, {})
+
+    stream.on('data', function(response) {
+      console.log("in stream", response)
+      setPlans(response.getValue())
+    });
+  };
+
+  useEffect(()=>{
+    getPlans()
+  },[]);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      Temperature : {plans[0]} F
     </div>
   );
 }
